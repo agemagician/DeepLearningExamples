@@ -42,6 +42,7 @@ from utils.exp_utils import benchmark
 from utils.exp_utils import create_exp_dir
 from utils.exp_utils import log_env_info
 
+torch.cuda.set_enabled_lms(True)
 
 def parse_args():
     parent_parser = argparse.ArgumentParser(
