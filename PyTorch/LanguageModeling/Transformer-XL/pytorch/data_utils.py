@@ -244,6 +244,10 @@ class Corpus(object):
                 'training-monolingual.tokenized.shuffled', 'news.en-*')
             train_paths = glob.glob(train_path_pattern)
             # the vocab will load from file when build_vocab() is called
+        elif self.dataset == 'bfd':
+            train_path_pattern = os.path.join(
+                path, 'bfd_train_*.txt')
+            train_paths = glob.glob(train_path_pattern)
 
         self.vocab.build_vocab()
 
@@ -267,6 +271,12 @@ class Corpus(object):
                 os.path.join(path, 'valid.txt'), ordered=False, add_double_eos=True)
             self.test = self.vocab.encode_file(
                 os.path.join(path, 'test.txt'), ordered=False, add_double_eos=True)
+        elif self.dataset == 'bfd':
+            self.train = train_paths
+            self.valid = self.vocab.encode_file(
+                os.path.join(path, 'bfd_valid.txt'), ordered=False, add_double_eos=True)
+            self.test = self.vocab.encode_file(
+                os.path.join(path, 'bfd_test.txt'), ordered=False, add_double_eos=True)
 
     def get_iterator(self, split, *args, **kwargs):
         if split == 'train':
@@ -275,11 +285,16 @@ class Corpus(object):
             elif self.dataset == 'lm1b':
                 kwargs['shuffle'] = True
                 data_iter = LMMultiFileIterator(self.train, self.vocab, *args, **kwargs)
+             elif self.dataset == 'bfd':
+                kwargs['shuffle'] = True
+                data_iter = LMMultiFileIterator(self.train, self.vocab, *args, **kwargs)
         elif split in ['valid', 'test']:
             data = self.valid if split == 'valid' else self.test
             if self.dataset in ['ptb', 'wt2', 'wt103', 'enwik8', 'text8']:
                 data_iter = LMOrderedIterator(data, *args, **kwargs)
             elif self.dataset == 'lm1b':
+                data_iter = LMShuffledIterator(data, *args, **kwargs)
+            elif self.dataset == 'bfd':
                 data_iter = LMShuffledIterator(data, *args, **kwargs)
 
         return data_iter
@@ -309,6 +324,10 @@ def get_lm_corpus(datadir, dataset, vocab):
             kwargs['special'] = []
             kwargs['lower_case'] = False
             kwargs['vocab_file'] = os.path.join(datadir, '1b_word_vocab.txt')
+        elif dataset in ['bfd']:
+            kwargs['special'] = []
+            kwargs['lower_case'] = False
+            kwargs['vocab_file'] = os.path.join(datadir, 'vocab.txt')
         elif dataset in ['enwik8', 'text8']:
             pass
 
