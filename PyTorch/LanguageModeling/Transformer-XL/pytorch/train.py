@@ -96,7 +96,7 @@ def parse_args():
     dataset.add_argument('--data', type=str, default='../data/wikitext-103',
                          help='Location of the data corpus')
     dataset.add_argument('--dataset', type=str, default='wt103',
-                         choices=['wt103', 'lm1b', 'enwik8', 'text8'],
+                         choices=['wt103', 'lm1b', 'enwik8', 'text8','bfd'],
                          help='Dataset name')
     dataset.add_argument('--vocab', type=str, default='word', choices=['word', 'bpe'],
                          help='Type of vocabulary')
