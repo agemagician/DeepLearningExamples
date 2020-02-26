@@ -59,12 +59,13 @@ def parse_args():
 
     config_args, _ = cfg_parser.parse_known_args()
 
-    if config_args.config is not None and config_args.config_file is not None:
-        with open(config_args.config_file) as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)[config_args.config]['train']
-    else:
-        config = {}
-
+    %if config_args.config is not None and config_args.config_file is not None:
+    %    with open(config_args.config_file) as f:
+    %        config = yaml.load(f, Loader=yaml.FullLoader)[config_args.config]['train']
+    %else:
+    %    config = {}
+    config = {}
+    
     general = parser.add_argument_group('general setup')
     general.add_argument('--work_dir', default='LM-TFM', type=str,
                          help='Directory for the results')
