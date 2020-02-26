@@ -567,7 +567,6 @@ def main():
 
     # Initialize device and distributed backend
     torch.cuda.set_device(args.local_rank)
-    logging.info(args.local_rank)
     device = torch.device('cuda' if args.cuda else 'cpu')
     utils.distributed.init_distributed(args.cuda)
 
@@ -733,6 +732,7 @@ def main():
                                  weight_decay=args.weight_decay)
         optimizer_sparse = None
 
+    logging.info(args.local_rank)
     model = model.to(device)
 
     if args.fp16:
