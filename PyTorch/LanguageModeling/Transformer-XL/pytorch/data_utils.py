@@ -285,7 +285,7 @@ class Corpus(object):
             elif self.dataset == 'lm1b':
                 kwargs['shuffle'] = True
                 data_iter = LMMultiFileIterator(self.train, self.vocab, *args, **kwargs)
-             elif self.dataset == 'bfd':
+            elif self.dataset == 'bfd':
                 kwargs['shuffle'] = True
                 data_iter = LMMultiFileIterator(self.train, self.vocab, *args, **kwargs)
         elif split in ['valid', 'test']:
