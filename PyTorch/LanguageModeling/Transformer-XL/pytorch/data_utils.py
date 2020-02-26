@@ -295,7 +295,7 @@ class Corpus(object):
             elif self.dataset == 'lm1b':
                 data_iter = LMShuffledIterator(data, *args, **kwargs)
             elif self.dataset == 'bfd':
-                data_iter = LMShuffledIterator(data, *args, **kwargs)
+                data_iter = LMOrderedIterator(data, *args, **kwargs)
 
         return data_iter
 
