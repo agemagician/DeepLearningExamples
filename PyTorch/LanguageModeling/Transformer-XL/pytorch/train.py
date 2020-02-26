@@ -567,6 +567,7 @@ def main():
 
     # Initialize device and distributed backend
     torch.cuda.set_device(args.local_rank)
+    print(args.local_rank)
     device = torch.device('cuda' if args.cuda else 'cpu')
     utils.distributed.init_distributed(args.cuda)
 
