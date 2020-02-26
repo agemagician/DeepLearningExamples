@@ -54,8 +54,8 @@ def parse_args():
     parser = argparse.ArgumentParser(parents=[parent_parser], add_help=True)
     cfg_parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
 
-    cfg_parser.add_argument('--config', default='default')
-    cfg_parser.add_argument('--config_file', default='config.yaml')
+    cfg_parser.add_argument('--config', default='None')
+    cfg_parser.add_argument('--config_file', default='None')
 
     config_args, _ = cfg_parser.parse_known_args()
 
