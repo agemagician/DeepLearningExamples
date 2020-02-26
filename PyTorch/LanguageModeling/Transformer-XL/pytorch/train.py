@@ -566,6 +566,7 @@ def main():
     args = parse_args()
 
     # Initialize device and distributed backend
+    args.local_rank = int(os.getenv('OMPI_COMM_WORLD_LOCAL_RANK'))
     torch.cuda.set_device(args.local_rank)
     device = torch.device('cuda' if args.cuda else 'cpu')
     utils.distributed.init_distributed(args.cuda)
