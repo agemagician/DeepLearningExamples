@@ -633,10 +633,14 @@ def main():
                                   device=device, ext_len=args.ext_len)
     va_iter = corpus.get_iterator('valid', args.eval_batch_size,
                                   args.eval_tgt_len, device=device,
-                                  mem_len=eval_mem_len, ext_len=args.ext_len)
+                                  ext_len=args.ext_len)
+                                  #mem_len=eval_mem_len, ext_len=args.ext_len)
     te_iter = corpus.get_iterator('test', args.eval_batch_size,
                                   args.eval_tgt_len, device=device,
-                                  mem_len=eval_mem_len, ext_len=args.ext_len)
+                                  #mem_len=eval_mem_len, ext_len=args.ext_len)
+                                  ext_len=args.ext_len)
+                                  
+                             
 
     # adaptive softmax / embedding
     cutoffs, tie_projs = [], [False]
