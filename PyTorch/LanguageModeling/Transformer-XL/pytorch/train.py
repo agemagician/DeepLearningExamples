@@ -395,7 +395,8 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
     log_start_time = time.time()
 
     mems = [None for _ in range(args.batch_chunk)]
-    train_iter = tr_iter.get_varlen_iter() if args.varlen else tr_iter
+    #train_iter = tr_iter.get_varlen_iter() if args.varlen else tr_iter
+    train_iter = tr_iter
 
     for batch, (data, target, seq_len, _) in enumerate(train_iter):
         log_step += 1
