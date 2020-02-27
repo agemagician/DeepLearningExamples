@@ -25,14 +25,14 @@ def init_distributed(cuda):
     :param cuda: (bool) if True initializes nccl backend, if False initializes
         gloo backend
     """
-    world_size = int(os.environ.get('WORLD_SIZE', 1))
-    distributed = (world_size > 1)
-    if distributed:
+    #world_size = int(os.environ.get('WORLD_SIZE', 1))
+    #distributed = (world_size > 1)
+    #if distributed:
         #backend = 'nccl' if cuda else 'gloo'
-        backend = 'ddl' if cuda else 'gloo'
-        torch.distributed.init_process_group(backend=backend,
-                                             init_method='env://')
-        assert torch.distributed.is_initialized()
+    backend = 'ddl' if cuda else 'gloo'
+    torch.distributed.init_process_group(backend=backend,
+                                         init_method='env://')
+    assert torch.distributed.is_initialized()
     return distributed
 
 
