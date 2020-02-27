@@ -394,45 +394,45 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
     log_step = 0
     log_start_time = time.time()
     
-    logging.info('1')
+    #logging.info('1')
     
     mems = [None for _ in range(args.batch_chunk)]
     train_iter = tr_iter.get_varlen_iter() if args.varlen else tr_iter
     #train_iter = tr_iter.get_varlen_iter() if args.varlen else tr_iter.get_fixlen_iter()
-    logging.info('2')
+    #logging.info('2')
     #for batch, (data, target, seq_len, _) in enumerate(train_iter):
     for batch, (data, target, seq_len) in enumerate(train_iter):
         log_step += 1
         target_tokens += target.numel()
-        logging.info('3')
+        #logging.info('3')
         model.zero_grad()
 
         data_chunks = torch.chunk(data, args.batch_chunk, 1)
         target_chunks = torch.chunk(target, args.batch_chunk, 1)
-        logging.info('4')
+        #logging.info('4')
         for i in range(args.batch_chunk):
             data_i = data_chunks[i].contiguous()
             target_i = target_chunks[i].contiguous()
             loss, mems[i] = para_model(data_i, target_i, mems[i])
             loss = loss.float().mean().type_as(loss) / args.batch_chunk
-            logging.info('5')
+            #logging.info('5')
             if args.fp16:
                 with amp.scale_loss(loss, optimizer) as scaled_loss:
                     scaled_loss.backward()
             else:
                 loss.backward()
-            logging.info('6')
+            #logging.info('6')
             train_loss += loss.float().item()
 
         if args.fp16:
             torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), args.clip)
         else:
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
-        logging.info('7')
+        l#ogging.info('7')
         optimizer.step()
         if optimizer_sparse:
             optimizer_sparse.step()
-        logging.info('8')
+        #logging.info('8')
         # step-wise learning rate annealing
         train_step += 1
         if args.scheduler in ['cosine', 'constant', 'dev_perf']:
@@ -451,24 +451,24 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
             scheduler.step(train_step)
             if scheduler_sparse:
                 scheduler_sparse.step(train_step)
-        logging.info('9')
+        #logging.info('9')
         if train_step % args.log_interval == 0:
             cur_loss = train_loss / log_step
             cur_loss = utils.distributed.all_reduce_item(cur_loss, op='mean')
             train_loss = 0
-            logging.info('10')
+            #logging.info('10')
             elapsed = time.time() - log_start_time
             avg_elapsed = elapsed / log_step
             avg_elapsed = utils.distributed.all_reduce_item(avg_elapsed, op='max')
             log_start_time = time.time()
             log_step = 0
-            logging.info('11')
+            #logging.info('11')
             lr = optimizer.param_groups[0]['lr']
             throughput = target_tokens / elapsed
             throughput = utils.distributed.all_reduce_item(throughput, op='sum')
             meters['train_throughput'].update(throughput)
             target_tokens = 0
-            logging.info('12')
+            #logging.info('12')
             log_str = '| epoch {:3d} step {:>8d} | batches {:>6d} / {:d} | lr {:.3e} ' \
                 '| ms/batch {:5.1f} | tok/s {:7.0f} | loss {:5.2f}'.format(
                     epoch,
@@ -480,7 +480,7 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
                     throughput,
                     cur_loss,
                     )
-            logging.info('13')
+            #logging.info('13')
             dllogger_data = {
                 'epoch': epoch,
                 'train_batch': batch+1,
@@ -489,22 +489,22 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
                 'train_throughput': throughput,
                 'train_loss': cur_loss,
                 }
-            logging.info('14')
+            #logging.info('14')
             if args.dataset in ['enwik8', 'text8']:
                 log_str += ' | bpc {:9.5f}'.format(cur_loss / math.log(2))
                 dllogger_data['train_bits_per_character'] = cur_loss / math.log(2)
             else:
                 log_str += ' | ppl {:9.2f}'.format(math.exp(cur_loss))
                 dllogger_data['train_perplexity'] = math.exp(cur_loss)
-            logging.info('15')
+            #logging.info('15')
             logging.info(log_str)
             dllogger.log(step=train_step, data=dllogger_data)
-        logging.info('16')
+        #logging.info('16')
         if train_step % args.eval_interval == 0:
             eval_start_time = time.time()
             val_loss = evaluate(va_iter, model, args)
             val_loss = utils.distributed.all_reduce_item(val_loss, op='mean')
-            logging.info('17')
+            #logging.info('17')
             logging.info('-' * 100)
             log_str = '| Eval {:3d} at step {:>8d} | time: {:5.2f}s ' \
                       '| valid loss {:5.2f}'.format(
@@ -513,7 +513,7 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
                           (time.time() - eval_start_time),
                           val_loss,
                           )
-            logging.info('18')
+            #logging.info('18')
             dllogger_data = {
                 'valid_elapsed': (time.time() - eval_start_time),
                 'valid_loss': val_loss,
@@ -528,7 +528,7 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
             logging.info(log_str)
             logging.info('-' * 100)
             dllogger.log(step=train_step, data=dllogger_data)
-            logging.info('19')
+            #logging.info('19')
             # Save the model if the validation loss is the best we've seen so far.
             if not best_val_loss or val_loss < best_val_loss:
                 best_val_loss = val_loss
@@ -537,21 +537,21 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
                     save_checkpoint(args, model, model_config, optimizer,
                                     scheduler, vocab, train_step,
                                     best_val_loss, args.work_dir, name)
-            logging.info('20')
+            #logging.info('20')
             # Always save after eval if save_all is true and not debug
             if not args.debug and args.save_all:
                 name = f'checkpoint_{train_step}.pt'
                 save_checkpoint(args, model, model_config, optimizer,
                                 scheduler, vocab, train_step, best_val_loss,
                                 args.work_dir, name)
-            logging.info('21')
+            #logging.info('21')
             # Save last checkpoint if not debug and not save_all
             if not args.debug and not args.save_all:
                 name = 'checkpoint_last.pt'
                 save_checkpoint(args, model, model_config, optimizer,
                                 scheduler, vocab, train_step, best_val_loss,
                                 args.work_dir, name)
-            logging.info('22')
+            #logging.info('22')
             # dev-performance based learning rate annealing
             if args.scheduler == 'dev_perf':
                 scheduler.step(val_loss)
@@ -848,7 +848,7 @@ def main():
         for epoch in itertools.count(start=1):
             if args.roll:
                 tr_iter.roll()
-            logging.info('Starting training!')
+            #logging.info('Starting training!')
             train_step, best_val_loss = train(
                 tr_iter, va_iter, model, para_model, model_config, optimizer,
                 optimizer_sparse, scheduler, scheduler_sparse, vocab, epoch,
