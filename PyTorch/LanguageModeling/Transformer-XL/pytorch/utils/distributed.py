@@ -33,6 +33,9 @@ def init_distributed(cuda):
     torch.distributed.init_process_group(backend=backend,
                                          init_method='env://')
     assert torch.distributed.is_initialized()
+    
+    distributed = True
+    
     return distributed
 
 
