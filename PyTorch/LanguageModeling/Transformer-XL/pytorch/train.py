@@ -739,7 +739,7 @@ def main():
                                  weight_decay=args.weight_decay)
         optimizer_sparse = None
 
-    logging.info(args.local_rank)
+    #logging.info(args.local_rank)
     model = model.to(device)
 
     if args.fp16:
