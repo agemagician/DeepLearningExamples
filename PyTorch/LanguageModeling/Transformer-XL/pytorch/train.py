@@ -393,33 +393,35 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
     target_tokens = 0
     log_step = 0
     log_start_time = time.time()
-
+    
+    logging.info('1')
+    
     mems = [None for _ in range(args.batch_chunk)]
     train_iter = tr_iter.get_varlen_iter() if args.varlen else tr_iter
     #train_iter = tr_iter.get_varlen_iter() if args.varlen else tr_iter.get_fixlen_iter()
-
+    logging.info('2')
     #for batch, (data, target, seq_len, _) in enumerate(train_iter):
     for batch, (data, target, seq_len) in enumerate(train_iter):
         log_step += 1
         target_tokens += target.numel()
-
+        logging.info('3')
         model.zero_grad()
 
         data_chunks = torch.chunk(data, args.batch_chunk, 1)
         target_chunks = torch.chunk(target, args.batch_chunk, 1)
-
+        logging.info('4')
         for i in range(args.batch_chunk):
             data_i = data_chunks[i].contiguous()
             target_i = target_chunks[i].contiguous()
             loss, mems[i] = para_model(data_i, target_i, mems[i])
             loss = loss.float().mean().type_as(loss) / args.batch_chunk
-
+            logging.info('5')
             if args.fp16:
                 with amp.scale_loss(loss, optimizer) as scaled_loss:
                     scaled_loss.backward()
             else:
                 loss.backward()
-
+            logging.info('6')
             train_loss += loss.float().item()
 
         if args.fp16:
