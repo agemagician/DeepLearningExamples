@@ -499,12 +499,12 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
             logging.info('15')
             logging.info(log_str)
             dllogger.log(step=train_step, data=dllogger_data)
-        
+        logging.info('16')
         if train_step % args.eval_interval == 0:
             eval_start_time = time.time()
             val_loss = evaluate(va_iter, model, args)
             val_loss = utils.distributed.all_reduce_item(val_loss, op='mean')
-
+            logging.info('17')
             logging.info('-' * 100)
             log_str = '| Eval {:3d} at step {:>8d} | time: {:5.2f}s ' \
                       '| valid loss {:5.2f}'.format(
@@ -513,7 +513,7 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
                           (time.time() - eval_start_time),
                           val_loss,
                           )
-
+            logging.info('18')
             dllogger_data = {
                 'valid_elapsed': (time.time() - eval_start_time),
                 'valid_loss': val_loss,
@@ -528,7 +528,7 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
             logging.info(log_str)
             logging.info('-' * 100)
             dllogger.log(step=train_step, data=dllogger_data)
-
+            logging.info('19')
             # Save the model if the validation loss is the best we've seen so far.
             if not best_val_loss or val_loss < best_val_loss:
                 best_val_loss = val_loss
@@ -537,21 +537,21 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
                     save_checkpoint(args, model, model_config, optimizer,
                                     scheduler, vocab, train_step,
                                     best_val_loss, args.work_dir, name)
-
+            logging.info('20')
             # Always save after eval if save_all is true and not debug
             if not args.debug and args.save_all:
                 name = f'checkpoint_{train_step}.pt'
                 save_checkpoint(args, model, model_config, optimizer,
                                 scheduler, vocab, train_step, best_val_loss,
                                 args.work_dir, name)
-
+            logging.info('21')
             # Save last checkpoint if not debug and not save_all
             if not args.debug and not args.save_all:
                 name = 'checkpoint_last.pt'
                 save_checkpoint(args, model, model_config, optimizer,
                                 scheduler, vocab, train_step, best_val_loss,
                                 args.work_dir, name)
-
+            logging.info('22')
             # dev-performance based learning rate annealing
             if args.scheduler == 'dev_perf':
                 scheduler.step(val_loss)
@@ -607,6 +607,8 @@ def main():
 
     if args.local_batch_size is not None:
         world_size = utils.distributed.get_world_size()
+        logging.info('world size is')
+        logging.info(world_size)
         args.batch_size = world_size * args.local_batch_size
         logging.info(f'--local_batch_size was set, adjusting global batch size'
                      f' to {args.batch_size} (local_batch_size * world_size)')
