@@ -844,6 +844,7 @@ def main():
         for epoch in itertools.count(start=1):
             if args.roll:
                 tr_iter.roll()
+            logging.info('Starting training!')
             train_step, best_val_loss = train(
                 tr_iter, va_iter, model, para_model, model_config, optimizer,
                 optimizer_sparse, scheduler, scheduler_sparse, vocab, epoch,
