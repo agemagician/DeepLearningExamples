@@ -428,11 +428,11 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
             torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), args.clip)
         else:
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
-
+        logging.info('7')
         optimizer.step()
         if optimizer_sparse:
             optimizer_sparse.step()
-
+        logging.info('8')
         # step-wise learning rate annealing
         train_step += 1
         if args.scheduler in ['cosine', 'constant', 'dev_perf']:
@@ -451,24 +451,24 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
             scheduler.step(train_step)
             if scheduler_sparse:
                 scheduler_sparse.step(train_step)
-
+        logging.info('9')
         if train_step % args.log_interval == 0:
             cur_loss = train_loss / log_step
             cur_loss = utils.distributed.all_reduce_item(cur_loss, op='mean')
             train_loss = 0
-
+            logging.info('10')
             elapsed = time.time() - log_start_time
             avg_elapsed = elapsed / log_step
             avg_elapsed = utils.distributed.all_reduce_item(avg_elapsed, op='max')
             log_start_time = time.time()
             log_step = 0
-
+            logging.info('11')
             lr = optimizer.param_groups[0]['lr']
             throughput = target_tokens / elapsed
             throughput = utils.distributed.all_reduce_item(throughput, op='sum')
             meters['train_throughput'].update(throughput)
             target_tokens = 0
-
+            logging.info('12')
             log_str = '| epoch {:3d} step {:>8d} | batches {:>6d} / {:d} | lr {:.3e} ' \
                 '| ms/batch {:5.1f} | tok/s {:7.0f} | loss {:5.2f}'.format(
                     epoch,
@@ -480,7 +480,7 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
                     throughput,
                     cur_loss,
                     )
-
+            logging.info('13')
             dllogger_data = {
                 'epoch': epoch,
                 'train_batch': batch+1,
@@ -489,17 +489,17 @@ def train(tr_iter, va_iter, model, para_model, model_config, optimizer,
                 'train_throughput': throughput,
                 'train_loss': cur_loss,
                 }
-
+            logging.info('14')
             if args.dataset in ['enwik8', 'text8']:
                 log_str += ' | bpc {:9.5f}'.format(cur_loss / math.log(2))
                 dllogger_data['train_bits_per_character'] = cur_loss / math.log(2)
             else:
                 log_str += ' | ppl {:9.2f}'.format(math.exp(cur_loss))
                 dllogger_data['train_perplexity'] = math.exp(cur_loss)
-
+            logging.info('15')
             logging.info(log_str)
             dllogger.log(step=train_step, data=dllogger_data)
-
+        
         if train_step % args.eval_interval == 0:
             eval_start_time = time.time()
             val_loss = evaluate(va_iter, model, args)
