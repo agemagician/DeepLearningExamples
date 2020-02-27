@@ -87,7 +87,7 @@ def all_reduce_item(value, op='sum'):
             raise RuntimeError('Unsupported reduce op')
 
         backend = torch.distributed.get_backend()
-        if backend == torch.distributed.Backend.NCCL:
+        if backend == torch.distributed.Backend.NCCL or backend == torch.distributed.Backend.DDL:
             device = torch.device('cuda')
         elif backend == torch.distributed.Backend.GLOO:
             device = torch.device('cpu')
